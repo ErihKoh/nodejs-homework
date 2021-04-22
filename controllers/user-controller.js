@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs").promises;
 const path = require("path");
 const Jimp = require("jimp");
-const { nanoid } = require("nanoid");
+// const { nanoid } = require("nanoid");
 require("dotenv").config();
 
 const SECRET_KEY = process.env.JWT_SECRET;
@@ -11,11 +11,12 @@ const Users = require("../model/users");
 const createFolderExist = require("../helpers/create-dir");
 
 const { HttpCode } = require("../helpers/constants");
-const EmailService = require("../services/email-service");
+// const EmailService = require("../services/email-service");
 
 const reg = async (req, res, next) => {
   try {
-    const { email, name } = req.body;
+    // const { email, name } = req.body;
+    const { email } = req.body;
     const user = await Users.findByEmail(email);
     if (user) {
       return res.status(HttpCode.CONFLICT).json({
@@ -25,13 +26,13 @@ const reg = async (req, res, next) => {
         message: "Email in use",
       });
     }
-    const verifyToken = nanoid();
-    const emailService = new EmailService(process.env.NODE_ENV);
-    await emailService.sendEmail(verifyToken, email, name);
+    // const verifyToken = nanoid();
+    // const emailService = new EmailService(process.env.NODE_ENV);
+    // await emailService.sendEmail(verifyToken, email, name);
     const newUser = await Users.create({
       ...req.body,
-      verify: false,
-      verifyToken,
+      // verify: false,
+      // verifyToken,
     });
     return res.status(HttpCode.CREATED).json({
       status: "success",
@@ -53,7 +54,7 @@ const login = async (req, res, next) => {
     const { email, password } = req.body;
     const user = await Users.findByEmail(email);
     const isValidPassword = await user?.validPassword(password);
-    if (!user || !isValidPassword || !user.verify) {
+    if (!user || !isValidPassword) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: "error",
         code: HttpCode.UNAUTHORIZED,
